@@ -1,0 +1,102 @@
+"""
+DecodeLabs Industrial Training Kit - Batch 2026
+Project 1: Rule-Based AI Chatbot
+-------------------------------------------------
+Goal:
+    Create a simple rule-based chatbot that responds to predefined
+    user inputs using control flow / decision-making logic (no ML).
+
+Architecture follows the "Logic Skeleton" spec:
+    1. INPUT LOOP     -> continuous while loop
+    2. SANITIZATION   -> handle case & whitespace
+    3. KNOWLEDGE BASE -> dictionary with 5+ intents (O(1) lookup)
+    4. FALLBACK       -> default response for unknown input
+    5. EXIT STRATEGY  -> clean break command
+"""
+
+import random
+
+# -------------------------------------------------------------------
+# PHASE 1: KNOWLEDGE BASE (The "Process" stage of the IPO model)
+# -------------------------------------------------------------------
+# Using a dictionary instead of an if-elif ladder gives us O(1)
+# constant-time lookups instead of O(n) linear scans (see "Algorithmic
+# Efficiency" slide). Each key maps to a list of possible replies so
+# the bot doesn't sound robotic by repeating the exact same line.
+
+knowledge_base = {
+    "hello": ["Hi there! How can I help you today?", "Hey! Good to see you."],
+    "hi": ["Hello! What can I do for you?", "Hi! How's it going?"],
+    "how are you": ["I'm just a bunch of if-else statements, but I'm doing great!",
+                     "Running smoothly, thanks for asking!"],
+    "what is your name": ["I'm DecodeBot, your friendly rule-based assistant.",
+                           "You can call me DecodeBot."],
+    "what can you do": ["I can chat with you using predefined rules - ask me about my name, how I am, or just say hi!",
+                         "I respond to a set of known phrases. Try saying 'help' to see examples."],
+    "help": ["Try saying: hello, how are you, what is your name, what can you do, thanks, or bye."],
+    "thanks": ["You're welcome!", "Anytime!", "Glad I could help!"],
+    "thank you": ["You're welcome!", "No problem at all!"],
+    "bye": ["Goodbye! Have a great day!"],
+    "exit": ["Goodbye! Have a great day!"],
+    "quit": ["Goodbye! Have a great day!"],
+}
+
+# Commands that should terminate the loop (the "Kill Command")
+EXIT_COMMANDS = {"bye", "exit", "quit"}
+
+FALLBACK_RESPONSES = [
+    "I do not understand. Type 'help' to see what I can respond to.",
+    "Sorry, I didn't get that. Try 'help' for a list of things I know.",
+]
+
+
+def sanitize(raw_input: str) -> str:
+    """
+    PHASE 1: INPUT & SANITIZATION
+    Normalizes raw user input so 'HeLLo', 'hello', and '  hello  '
+    all map to the same dictionary key.
+    """
+    return raw_input.lower().strip()
+
+
+def get_response(clean_input: str) -> str:
+    """
+    PHASE 2: PROCESS (Intent Matching)
+    Uses dict.get() to perform an atomic lookup + fallback in a
+    single operation, instead of a long if-elif chain.
+    """
+    if clean_input in knowledge_base:
+        return random.choice(knowledge_base[clean_input])
+    return random.choice(FALLBACK_RESPONSES)
+
+
+def run_chatbot():
+    """
+    PHASE 3: THE HEARTBEAT (Infinite Loop)
+    The chatbot stays "alive", continuously accepting input, until
+    the user issues a kill command (bye / exit / quit).
+    """
+    print("=" * 50)
+    print(" DecodeBot - Rule-Based AI Chatbot (Project 1) ")
+    print(" Type 'help' to see what I can do, or 'bye' to exit.")
+    print("=" * 50)
+
+    while True:
+        raw_input_text = input("You: ")
+        clean_input = sanitize(raw_input_text)
+
+        # Guard clause: empty input shouldn't crash or confuse the bot
+        if clean_input == "":
+            print("Bot: Please type something!")
+            continue
+
+        response = get_response(clean_input)
+        print(f"Bot: {response}")
+
+        # EXIT STRATEGY: clean break out of the infinite loop
+        if clean_input in EXIT_COMMANDS:
+            break
+
+
+if __name__ == "__main__":
+    run_chatbot()
